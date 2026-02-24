@@ -15,8 +15,4 @@ prices_html = soup.find_all(attrs={'data-test':'property-card-price'})
 prices_text = [re.split(r"[\/+]", price.text)[0] for price in prices_html]
 
 addresses_html = soup.find_all(attrs={'data-test': 'property-card-addr'})
-addresses_text = [address.text.rstrip().strip() for address in addresses_html]
-
-print(addresses_text)
-
-### TODO need to strip text
+addresses_text = [re.sub(r"^.*?[,/|]", "",address.text.rstrip().strip()) for address in addresses_html]
