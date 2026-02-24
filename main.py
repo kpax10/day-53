@@ -1,6 +1,8 @@
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import requests
 import re
 
@@ -20,16 +22,27 @@ addresses_text = [re.sub(r"^.*?[,/|]", "",address.text.rstrip().strip()) for add
 
 listings = zip(addresses_text, prices_text, links_text)
 
-
-driver = webdriver.Chrome()
+chrome_options = webdriver.ChromeOptions()
+driver = webdriver.Chrome() # options=chrome_options
 driver.get(GOOGLE_FORM_LINK)
 
-address_input = driver.find_element(By.CSS_SELECTOR, '.whsOnd.zHQkBf')
-address_input.send_keys('test')
+wait = WebDriverWait(driver,5)
 
-# for listing in listings:
-#   print(listing)
+for listing in listings:
+  WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.XPATH, '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[1]/div/div/div[2]/div/div[1]/div/div[1]/input')))
 
+  address_input = driver.find_element(By.XPATH, '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[1]/div/div/div[2]/div/div[1]/div/div[1]/input')
+  address_input.send_keys(listing[0])
+  price_input = driver.find_element(By.XPATH, '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div/div[1]/input')
+  price_input.send_keys(listing[1])
+  link_input = driver.find_element(By.XPATH, '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[1]/div/div[1]/input')
+  link_input.send_keys(listing[2])
+  submit = driver.find_element(By.XPATH, '//*[@id="mG61Hd"]/div[2]/div/div[3]/div[1]/div[1]/div/span/span')
+  submit.click()
 
+  WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div[2]/div[1]/div/div[4]/a')))
 
-input('Press Enter to close....')
+  reload_page = driver.find_element(By.XPATH, '/html/body/div[1]/div[2]/div[1]/div/div[4]/a')
+  reload_page.click()
+
+driver.quit()
